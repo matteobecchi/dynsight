@@ -150,6 +150,6 @@ def jaccard_change_in_time(
 
     den_not_0 = jlens_den != 0
 
-    jlens_array[den_not_0] = 1 - jlens_num[den_not_0] / jlens_den[den_not_0]
+    jlens_array[den_not_0] = jlens_num[den_not_0] / jlens_den[den_not_0]
 
     return jlens_array, jlens_num, jlens_den
