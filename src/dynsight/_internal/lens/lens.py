@@ -104,3 +104,52 @@ def neighbour_change_in_time(
         lensnumerators[den_not_0] / lensdenominators[den_not_0]
     )
     return lensarray, numberofneighs, lensnumerators, lensdenominators
+
+
+def jaccard_change_in_time(
+    neigh_list_per_frame: list[list[AtomGroup]],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:  # type: ignore[type-arg]
+    """Returns the time variation of neighbors using the Jaccard distance.
+
+    * Author: Matteo Becchi <bechmath@gmail.com>
+    * Original code by: Martina Crippa
+    * Mantainer: Andrew Tarzia
+    * Date: November, 7, 2024
+
+    Parameters:
+        neigh_list_per_frame:
+            a frame by frame list of the neighbours of each atom output
+            of :func:`listNeighboursAlongTrajectory`.
+
+    Returns:
+        - **jlensArray** The calculated jLENS parameter
+        - **jlensNumerators** the numerators used for calculating jLENS
+        - **jlensDenominators** the denominators used for calculating jLENS
+
+    Notes:
+    Each nnlist contains also the atom that generates them,
+    so 0 neighbors is a 1 element list.
+    """
+    n_atoms = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
+    n_frames = np.asarray(neigh_list_per_frame, dtype=object).shape[0]
+
+    jlens_num = np.zeros((n_atoms, n_frames - 1))
+    jlens_den = np.zeros((n_atoms, n_frames - 1))
+    jlens_array = np.zeros((n_atoms, n_frames - 1))
+
+    for atom_id in range(n_atoms):
+        for frame in range(1, n_frames):
+            jlens_num[atom_id, frame - 1] = np.setxor1d(
+                neigh_list_per_frame[frame][atom_id],
+                neigh_list_per_frame[frame - 1][atom_id],
+            ).shape[0]
+            jlens_den[atom_id, frame - 1] = np.union1d(
+                neigh_list_per_frame[frame][atom_id],
+                neigh_list_per_frame[frame - 1][atom_id],
+            ).shape[0]
+
+    den_not_0 = jlens_den != 0
+
+    jlens_array[den_not_0] = 1 - jlens_num[den_not_0] / jlens_den[den_not_0]
+
+    return jlens_array, jlens_num, jlens_den
