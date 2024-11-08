@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dynsight.onion import onion_uni
+from dynsight.onion.helpers import reshape_from_nt
 from dynsight.onion.plot import (
     plot_medoids_uni,
     plot_one_trj_uni,
@@ -25,7 +26,6 @@ def main() -> None:
 
     ### Load the input data - it's an array of shape (n_particles, n_frames)
     input_data = np.load(path_to_input_data)[:, 1:]
-    n_particles = input_data.shape[0]
     n_frames = input_data.shape[1]
 
     ### CLUSTERING WITH A SINGLE TIME RESOLUTION ###
@@ -33,14 +33,10 @@ def main() -> None:
     ### time-series will be divided
     tau_window = 5
     n_windows = int(n_frames / tau_window)  # Number of windows
-    frames_in_excess = n_frames - n_windows * tau_window
 
     ### The input array needs to be (n_parrticles * n_windows, tau_window)
     ### because each window is trerated as a single data-point
-    reshaped_data = np.reshape(
-        input_data[:, :-frames_in_excess],
-        (n_particles * n_windows, tau_window),
-    )
+    reshaped_data = reshape_from_nt(input_data, tau_window)
 
     ### onion_uni() returns the list of states and the label for each
     ### signal window
@@ -54,8 +50,7 @@ def main() -> None:
     plot_sankey("Fig5.png", labels, n_windows, [10, 20, 30, 40])
 
     ### CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS ###
-    tmp_list = np.geomspace(2, 499, num=20, dtype=int)
-    tau_windows = [x for i, x in enumerate(tmp_list) if x not in tmp_list[:i]]
+    tau_windows = np.unique(np.geomspace(2, n_frames, num=20, dtype=int))
 
     tra = np.zeros((len(tau_windows), 3))  # List of number of states and
     # ENV0 population for each tau_window
@@ -63,15 +58,7 @@ def main() -> None:
 
     for i, tau_window in enumerate(tau_windows):
         n_windows = int(n_frames / tau_window)
-        frames_in_excess = n_frames - n_windows * tau_window
-        if frames_in_excess > 0:
-            tmp_input_data = input_data[:, :-frames_in_excess]
-        else:
-            tmp_input_data = input_data
-        reshaped_data = np.reshape(
-            tmp_input_data,
-            (n_particles * n_windows, tau_window),
-        )
+        reshaped_data = reshape_from_nt(input_data, tau_window)
 
         state_list, labels = onion_uni(reshaped_data)
 
