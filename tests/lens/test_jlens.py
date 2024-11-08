@@ -66,6 +66,9 @@ def test_jlens_signals(original_wd: Path) -> None:
         )
         test_jlens, *_ = dynsight.lens.jaccard_change_in_time(neig_counts)
 
+        # np.save(original_wd / f"tests/lens/jLENS_output/jLENS_check_array_{i}.npy",
+        #     test_jlens)
+
         # Load check array
         check_jlens = np.load(
             original_wd / f"tests/lens/jLENS_output/jLENS_check_array_{i}.npy"

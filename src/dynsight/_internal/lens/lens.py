@@ -111,6 +111,12 @@ def jaccard_change_in_time(
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:  # type: ignore[type-arg]
     """Returns the time variation of neighbors using the Jaccard distance.
 
+    This function uses the Jaccard distance between sets to measure the amount
+    of variation in the neighbor list of each atom from one frame to the next.
+    The Jaccard distance between two sets A and B is defined as
+
+    d_J = 1 - |intersection(A, B)| / |union(A, B)|
+
     * Author: Matteo Becchi <bechmath@gmail.com>
     * Original code by: Martina Crippa
     * Mantainer: Andrew Tarzia
@@ -127,8 +133,8 @@ def jaccard_change_in_time(
         - **jlensDenominators** the denominators used for calculating jLENS
 
     Notes:
-    Each nnlist contains also the atom that generates them,
-    so 0 neighbors is a 1 element list.
+    Each nnlist contains also the atom that generates them, so 0 neighbors is
+        a 1 element list.
     """
     n_atoms = np.asarray(neigh_list_per_frame, dtype=object).shape[1]
     n_frames = np.asarray(neigh_list_per_frame, dtype=object).shape[0]
