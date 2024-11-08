@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dynsight.onion import onion_multi
+from dynsight.onion.helpers import reshape_from_dnt
 from dynsight.onion.plot import (
     plot_medoids_multi,
     plot_one_trj_multi,
@@ -28,7 +29,6 @@ def main() -> None:
     ### Load the input data -
     ### it's an array of shape (n_dims, n_particles, n_frames)
     input_data = np.load(path_to_input_data)
-    n_particles = input_data.shape[1]
     n_frames = input_data.shape[2]
 
     ### CLUSTERING WITH A SINGLE TIME RESOLUTION ###
@@ -41,7 +41,7 @@ def main() -> None:
     ### The input array has to be (n_parrticles * n_windows,
     ### tau_window * n_dims)
     ### because each window is trerated as a single data-point
-    reshaped_data = np.reshape(input_data, (n_particles * n_windows, -1))
+    reshaped_data = reshape_from_dnt(input_data, tau_window)
 
     ### onion_multi() returns the list of states and the label for each
     ### signal window
@@ -63,17 +63,7 @@ def main() -> None:
 
     for i, tau_window in enumerate(tau_window_list):
         n_windows = int(n_frames / tau_window)
-        excess_frames = n_frames - n_windows * tau_window
-
-        if excess_frames > 0:
-            reshaped_data = np.reshape(
-                input_data[:, :, :-excess_frames],
-                (n_particles * n_windows, -1),
-            )
-        else:
-            reshaped_data = np.reshape(
-                input_data, (n_particles * n_windows, -1)
-            )
+        reshaped_data = reshape_from_dnt(input_data, tau_window)
 
         state_list, labels = onion_multi(reshaped_data, bins=bins)
 
