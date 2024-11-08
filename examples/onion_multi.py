@@ -3,17 +3,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+import dynsight
 from dynsight.onion import onion_multi
-from dynsight.onion.helpers import reshape_from_dnt
-from dynsight.onion.plot import (
-    plot_medoids_multi,
-    plot_one_trj_multi,
-    plot_output_multi,
-    plot_pop_fractions,
-    plot_sankey,
-    plot_state_populations,
-    plot_time_res_analysis,
-)
 
 
 def main() -> None:
@@ -41,18 +32,24 @@ def main() -> None:
     ### The input array has to be (n_parrticles * n_windows,
     ### tau_window * n_dims)
     ### because each window is trerated as a single data-point
-    reshaped_data = reshape_from_dnt(input_data, tau_window)
+    reshaped_data = dynsight.onion.helpers.reshape_from_dnt(
+        input_data, tau_window)
 
     ### onion_multi() returns the list of states and the label for each
     ### signal window
     state_list, labels = onion_multi(reshaped_data, bins=bins)
 
     ### These functions are examples of how to visualize the results
-    plot_output_multi("Fig1.png", input_data, state_list, labels, tau_window)
-    plot_one_trj_multi("Fig2.png", 0, tau_window, input_data, labels)
-    plot_medoids_multi("Fig3.png", tau_window, input_data, labels)
-    plot_state_populations("Fig4.png", n_windows, labels)
-    plot_sankey("Fig5.png", labels, n_windows, [100, 200, 300, 400])
+    dynsight.onion.plot.plot_output_multi(
+        "Fig1.png", input_data, state_list, labels, tau_window)
+    dynsight.onion.plot.plot_one_trj_multi(
+        "Fig2.png", 0, tau_window, input_data, labels)
+    dynsight.onion.plot.plot_medoids_multi(
+        "Fig3.png", tau_window, input_data, labels)
+    dynsight.onion.plot.plot_state_populations(
+        "Fig4.png", n_windows, labels)
+    dynsight.onion.plot.plot_sankey(
+        "Fig5.png", labels, n_windows, [100, 200, 300, 400])
 
     ### CLUSTERING THE WHOLE RANGE OF TIME RESOLUTIONS ###
     tau_window_list = np.geomspace(3, 10000, 20, dtype=int)
@@ -63,7 +60,8 @@ def main() -> None:
 
     for i, tau_window in enumerate(tau_window_list):
         n_windows = int(n_frames / tau_window)
-        reshaped_data = reshape_from_dnt(input_data, tau_window)
+        reshaped_data = dynsight.onion.helpers.reshape_from_dnt(
+            input_data, tau_window)
 
         state_list, labels = onion_multi(reshaped_data, bins=bins)
 
@@ -76,8 +74,8 @@ def main() -> None:
         pop_list.append(list_pop)
 
     ### These functions are examples of how to visualize the results
-    plot_time_res_analysis("Fig6.png", tra)
-    plot_pop_fractions("Fig7.png", pop_list)
+    dynsight.onion.plot.plot_time_res_analysis("Fig6.png", tra)
+    dynsight.onion.plot.plot_pop_fractions("Fig7.png", pop_list)
 
     plt.show()
 
