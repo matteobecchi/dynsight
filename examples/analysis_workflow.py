@@ -33,7 +33,10 @@ def main() -> None:
         water_smooth,
         particle_id=1234,
     )
-    water_onion.color_trj(water_trj, files_path / "colored_trj.xyz")
+    frame_sel = slice(0, -1)
+    water_onion.color_trj(
+        water_trj.get_slice(frame_sel), files_path / "colored_trj.xyz"
+    )
 
     # Save/load the Insight with all the results
     water_onion.dump_to_json(files_path / "water_lens.json")
