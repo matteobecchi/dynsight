@@ -603,6 +603,27 @@ class Trj:
         universe = MDAnalysis.Universe(topo_file, traj_file)
         return Trj(universe)
 
+    def get_slice(
+        self,
+        frame_sel: slice | range | list[int] | NDArray[np.int64],
+    ) -> Trj:
+        if isinstance(frame_sel, (slice, range)):
+            indices = np.arange(len(self.universe.trajectory))[frame_sel]
+        else:
+            indices = np.asarray(frame_sel)
+
+        coords = []
+        times = []
+        for i in indices:
+            ts = self.universe.trajectory[i]
+            coords.append(ts.positions.copy())
+            times.append(ts.time)
+
+        mem_reader = MDAnalysis.coordinates.memory.MemoryReader(
+            coords, dt=self.universe.trajectory.dt, time=times
+        )
+        return MDAnalysis.Universe(self.universe.filename, mem_reader)
+
     def get_coordinates(self, selection: str) -> NDArray[np.float64]:
         """Returns the coordinates as an array.
 

@@ -25,7 +25,7 @@ def main() -> None:
     water_smooth = water_lens.spatial_average(water_trj, r_cut=7.5)
 
     # And we can perform onion-clustering
-    water_onion = water_smooth.get_onion(delta_t=10)
+    water_onion = water_smooth.get_onion_smooth(delta_t=10)
 
     water_onion.plot_output(files_path / "tmp_fig1.png", water_smooth)
     water_onion.plot_one_trj(
@@ -33,6 +33,7 @@ def main() -> None:
         water_smooth,
         particle_id=1234,
     )
+    water_onion.color_trj(water_trj, files_path / "colored_trj.xyz")
 
     # Save/load the Insight with all the results
     water_onion.dump_to_json(files_path / "water_lens.json")
