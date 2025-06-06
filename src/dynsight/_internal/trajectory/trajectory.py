@@ -530,6 +530,34 @@ class OnionSmoothInsight(ClusterInsight):
             frame_list,
         )
 
+    def color_trj(
+        self,
+        trj: Trj,
+        output_xyz: Path,
+    ) -> None:
+        """Print a .xyz trajectory with the labels as atom type.
+
+        Parameters:
+            trj: the Traj object
+            output_xyz: path to save the output XYZ trajectory
+        """
+        n_atoms = trj.universe.atoms.n_atoms
+        n_frames = len(trj.universe.trajectory)
+
+        if self.labels.shape != (n_atoms, n_frames):
+            msg = "Trj and labels shapes mismatch."
+            raise ValueError(msg)
+
+        uni = trj.universe
+        with MDAnalysis.coordinates.XYZ.XYZWriter(
+            output_xyz, n_atoms=n_atoms
+        ) as writer:
+            for ts_idx, _ in enumerate(uni.trajectory):
+                # Temporarily override atom names with label values
+                atom_names = [str(label) for label in self.labels[:, ts_idx]]
+                uni.atoms.names = atom_names
+                writer.write(uni.atoms)
+
 
 @dataclass(frozen=True)
 class Trj:
